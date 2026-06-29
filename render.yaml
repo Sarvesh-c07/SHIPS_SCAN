@@ -1,0 +1,14 @@
+# Render Blueprint — deploy by pushing this repo and choosing "New > Blueprint".
+# Or configure the same fields manually via "New > Web Service".
+services:
+  - type: web
+    name: shipscan
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    # ONE worker on purpose: the app holds job state in memory, so it must not be
+    # spread across workers. Long timeout: a big fetch runs on one request thread.
+    startCommand: "gunicorn app:app --workers 1 --threads 4 --timeout 600 --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: SHIPSCAN_PASSWORD
+        sync: false          # SET THIS in the dashboard — it locks the site behind a password
